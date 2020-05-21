@@ -1,3 +1,7 @@
+// ORIGINAL SOURCE: https://github.com/lltcggie/waifu2x-caffe
+// This file is a modification translated to english.
+// source.cpp -- 20 / 05 / 2020 --- waifu2x_caffe.ipynb
+
 #include <stdio.h>
 #include <algorithm>
 #include <boost/filesystem.hpp>
@@ -99,11 +103,11 @@ int main(int argc, char** argv)
 
 	Waifu2x::init_liblary(argc, argv);
 
-	// Caffeのエラーでないログを保存しないようにする
+	// Do not save non-error logs of Caffe
 	google::SetLogDestination(google::GLOG_INFO, "");
 	google::SetLogDestination(google::GLOG_WARNING, "");
 
-	// Caffeのエラーログを「error_log_～」に出力
+	// Output Caffe's error log to 'error_log_~'.
 	google::SetLogDestination(google::GLOG_ERROR, "error_log_");
 	google::SetLogDestination(google::GLOG_FATAL, "error_log_");
 
@@ -218,7 +222,7 @@ int main(int argc, char** argv)
 	}
 	catch (std::exception &e)
 	{
-		tprintf(TEXT("エラー: ") CHAR_STR_FORMAT TEXT("\n"), e.what());
+		tprintf(TEXT("ERROR: ") CHAR_STR_FORMAT TEXT("\n"), e.what());
 		return 1;
 	}
 
@@ -265,13 +269,13 @@ int main(int argc, char** argv)
 	const bool use_tta = cmdTTALevel.getValue() == 1;
 
 	std::vector<std::pair<tstring, tstring>> file_paths;
-	if (boost::filesystem::is_directory(input_path)) // input_pathがフォルダならそのディレクトリ以下の画像ファイルを一括変換
+	if (boost::filesystem::is_directory(input_path)) // Batch conversion of image files under the directory if input_path is a folder
 	{
 		boost::filesystem::path output_path;
 
 		if (cmdOutputFile.getValue() == TEXT("(auto)"))
 		{
-			// 「test」なら「test_noise_scale(Level1)(x2.000000)」みたいな感じにする
+			// If it is "test", it should be like "test_noise_scale(Level1)(x2.000000)".
 
 			tstring addstr(TEXT("("));
 			addstr += tModelName;
@@ -312,14 +316,14 @@ int main(int argc, char** argv)
 		{
 			if (!boost::filesystem::create_directory(output_path))
 			{
-				tprintf(TEXT("エラー: 出力フォルダ「%s」の作成に失敗しました\n"), path_to_tstring(output_path).c_str());
+				tprintf(TEXT("Error: Failed to create output folder '%s'.\n"), path_to_tstring(output_path).c_str());
 				return 1;
 			}
 		}
 
 		std::vector<tstring> extList;
 		{
-			// input_extention_listを文字列の配列にする
+			// Turn input_extention_list into an array of strings
 
 			typedef boost::char_separator<TCHAR> char_separator;
 			typedef boost::tokenizer<char_separator, tstring::const_iterator, tstring> tokenizer;
@@ -335,7 +339,7 @@ int main(int argc, char** argv)
 			}
 		}
 
-		// 変換する画像の入力、出力パスを取得
+		// Acquire the input and output path of the image to be converted
 		const auto func = [&extList, &input_path, &output_path, &outputExt, &file_paths](const boost::filesystem::path &path)
 		{
 			BOOST_FOREACH(const boost::filesystem::path& p, std::make_pair(boost::filesystem::recursive_directory_iterator(path),
@@ -350,7 +354,7 @@ int main(int argc, char** argv)
 					{
 						if (!boost::filesystem::create_directory(out_absolute))
 						{
-							tprintf(TEXT("エラー: 出力フォルダ「%s」の作成に失敗しました\n"), path_to_tstring(out_absolute).c_str());
+							tprintf(TEXT("Error: creation of the output folder '%s' failed.\n"), path_to_tstring(out_absolute).c_str());
 							return false;
 						}
 					}
@@ -383,7 +387,7 @@ int main(int argc, char** argv)
 
 		if (outputFileName == TEXT("(auto)"))
 		{
-			// 「miku_small.png」なら「miku_small(noise_scale)(Level1)(x2.000000).png」みたいな感じにする
+			// If it is "miku_small.png", it should be like "miku_small(noise_scale)(Level1)(x2.000000).png".
 
 			outputFileName = cmdInputFile.getValue();
 			const auto tailDot = outputFileName.find_last_of('.');
@@ -447,16 +451,16 @@ int main(int argc, char** argv)
 	switch (ret)
 	{
 	case Waifu2x::eWaifu2xError_InvalidParameter:
-		tprintf(TEXT("エラー: パラメータが不正です\n"));
+		tprintf(TEXT("Error: Invalid parameter.\n"));
 		return 1;
 	case Waifu2x::eWaifu2xError_FailedOpenModelFile:
-		tprintf(TEXT("エラー: モデルファイルが開けませんでした\n"));
+		tprintf(TEXT("Error: Model file could not be opened.\n"));
 		return 1;
 	case Waifu2x::eWaifu2xError_FailedParseModelFile:
-		tprintf(TEXT("エラー: モデルファイルが壊れています\n"));
+		tprintf(TEXT("Error: The model file is corrupt.\n"));
 		return 1;
 	case Waifu2x::eWaifu2xError_FailedConstructModel:
-		tprintf(TEXT("エラー: ネットワークの構築に失敗しました\n"));
+		tprintf(TEXT("Error: Network build failed.\n"));
 		return 1;
 	}
 
@@ -471,16 +475,16 @@ int main(int argc, char** argv)
 			switch (ret)
 			{
 			case Waifu2x::eWaifu2xError_InvalidParameter:
-				tprintf(TEXT("エラー: パラメータが不正です\n"));
+				tprintf(TEXT("Error: Invalid parameter.\n"));
 				break;
 			case Waifu2x::eWaifu2xError_FailedOpenInputFile:
-				tprintf(TEXT("エラー: 入力画像「%s」が開けませんでした\n"), p.first.c_str());
+				tprintf(TEXT("Error: Input image '%s' could not be opened.\n"), p.first.c_str());
 				break;
 			case Waifu2x::eWaifu2xError_FailedOpenOutputFile:
-				tprintf(TEXT("エラー: 出力画像「%s」が書き込めませんでした\n"), p.second.c_str());
+				tprintf(TEXT("Error: Output image '%s' could not be written to.\n"), p.second.c_str());
 				break;
 			case Waifu2x::eWaifu2xError_FailedProcessCaffe:
-				tprintf(TEXT("エラー: 補間処理に失敗しました\n"));
+				tprintf(TEXT("Error: Interpolation failed.\n"));
 				break;
 			}
 
@@ -490,11 +494,11 @@ int main(int argc, char** argv)
 
 	if (isError)
 	{
-		tprintf(TEXT("変換に失敗したファイルがあります\n"));
+		tprintf(TEXT("We have a file that failed to convert.\n"));
 		return 1;
 	}
 
-	tprintf(TEXT("変換に成功しました\n"));
+	tprintf(TEXT("The conversion has been successful.\n"));
 
 	Waifu2x::quit_liblary();
 
