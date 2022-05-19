@@ -1,5 +1,12 @@
 # Build on Ubuntu 16.04
 
+## Install deps
+```
+apt install libboost-system-dev libboost-filesystem-dev libboost-thread-dev libopenblas-dev libboost-iostreams-dev libopenblas-dev libhdf5-dev \
+git build-essential cmake pkg-config libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev \
+protobuf-compiler libgflags-dev libgoogle-glog-dev liblmdb-dev nkf
+```
+
 ## Build caffe for waifu2x-caffe
 
 ```
@@ -46,4 +53,31 @@ cd bin
 ./waifu2x-caffe -p cudnn -m scale -i input.png -o out.png | nkf
 ./waifu2x-caffe -p cuda -m scale -i input.png -o out.png | nkf
 ./waifu2x-caffe -p cpu -m scale -i input.png -o out.png | nkf
+```
+
+# Docker
+
+build
+```
+docker build -t waifu2x-caffe-ubuntu .
+```
+
+test gpu
+```
+$ docker run --gpus 0 waifu2x-caffe-ubuntu nvidia-smi
+```
+
+help
+```
+$ docker run --gpus 0 waifu2x-caffe-ubuntu waifu2x-caffe -h
+```
+
+run (2x ./query/test.png -> ./query/2x.png )
+```
+$ docker run --gpus 0 -v `pwd`/query:/images waifu2x-caffe-ubuntu waifu2x-caffe -p cudnn -m scale -i /images/test.png -o /images/2x.png | nkf
+```
+
+run with photo model
+```
+docker run --gpus 0 -v `pwd`/query:/images waifu2x-caffe-ubuntu waifu2x-caffe -p cudnn --model_dir ./models/upconv_7_photo  -m scale -i /images/test.png -o /images/2x.png | nkf
 ```
